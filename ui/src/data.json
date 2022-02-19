@@ -1,0 +1,8 @@
+{
+    "listings":[
+        {"id": 1, "area": "Αθήνα", "listType": "πώληση", "sqm": 150, "price": 250000},
+        {"id": 2, "area": "Θεσσαλονίκη", "listType": "πώληση", "sqm": 70, "price": 150000},
+        {"id": 3, "area": "Πάτρα", "listType": "πώληση", "sqm": 90, "price": 180000},
+        {"id": 4, "area": "Ηράκλειο", "listType": "ενοικίαση", "sqm": 50, "price": 250}
+    ]
+}
