@@ -171,7 +171,7 @@ public class ListingControllerTests {
 
         // Send Request to delete to an invalid id listing
         assertThrows(HttpClientErrorException.BadRequest.class, () -> {
-            restTemplate.delete(listingUrl + "/" + firstUser.getId() + "/" + "invalidId");
+            restTemplate.delete(listingUrl + "/" + firstUser.getId() + "/" + "2022");
         });
 
         // Assert that the user's listings were updated
