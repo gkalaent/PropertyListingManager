@@ -41,10 +41,11 @@ public class ListingController {
     @PostMapping("/{userId}")
     public ResponseEntity addListing(@PathVariable Long userId, @RequestBody Listing listing) {
         Optional<User> user = userRepository.findById(userId);
-        System.out.println(listing);
-        if (user.isPresent()){
-            listingRepository.save(listing);
-            return ResponseEntity.ok().build();
+        if (user.isPresent()) {
+
+            Listing newListing = new Listing(listing.getCity(), listing.getPrice(), listing.getAvailability(), listing.getArea(), user.get());
+            listingRepository.save(newListing);
+            return ResponseEntity.ok(newListing);
         }
         return ResponseEntity.badRequest().build();
     }

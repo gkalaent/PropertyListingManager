@@ -1,5 +1,8 @@
 import * as React from "react";
 import "./App.css";
+
+import { clone } from 'lodash';
+
 // Routing Imports
 import {
   Routes,
@@ -54,18 +57,30 @@ import { SelectChangeEvent } from "@mui/material/Select";
 
 
 export default function App() {
+  const [city, setCity] = React.useState("");
+  const [availability, setAvailability] = React.useState("");
+  const [price, setPrice] = React.useState("");
   const [area, setArea] = React.useState("");
-  const [listType, setListType] = React.useState("");
+
 
   const [user, setUser] = React.useState<any>(null);
   const [listings, setListings] = React.useState<any>([]);
 
-  const handleAreaChange = (event: SelectChangeEvent) => {
+  const handleCityChange = (event: SelectChangeEvent) => {
+    setCity(event.target.value as string);
+  };
+  const handleAvailabilityChange = (event: SelectChangeEvent) => {
+    setAvailability(event.target.value as string);
+  };
+
+  const handleAreaChange = (event) => {
     setArea(event.target.value as string);
   };
-  const handleListTypeChange = (event: SelectChangeEvent) => {
-    setListType(event.target.value as string);
+  const handlePriceChange = (event) => {
+    setPrice(event.target.value as string);
   };
+
+
 
   // Theme provider #fe9009 #04a7b7
   const theme = createTheme({
@@ -119,7 +134,13 @@ export default function App() {
 
     let signout = (callback: VoidFunction) => {
       return authorizor.signout(() => {
+        // Reset state
         setUser(null);
+        setListings([]);
+        setArea("");
+        setPrice("");
+        setAvailability("");
+        setCity("");
         callback();
       });
     };
@@ -267,13 +288,33 @@ export default function App() {
     );
   }
 
-  function getForm() {
+  async function handleInsertForm(event) {
+    event.preventDefault();
 
-    //TODO handle form data to insert new listings
-    function handleForm(event) {
-      event.preventDefault();
+    const requestOptions = {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({price: price, area: area, availability: availability, city: city})
+    };
+
+    const response = await fetch(`/listings/${user.id}`, requestOptions);
+    if (response.ok) {
+      const data = await response.json();
+      //setListings(data);
+      let updatedListings = clone(listings);
+      updatedListings.push(data);
+      setListings(updatedListings);
+
+      // Clear form state
+      setPrice("");
+      setCity("");
+      setAvailability("");
+      setArea("");
 
     }
+  }
+
+  function getForm() {
 
     return (
       <Container>
@@ -284,19 +325,21 @@ export default function App() {
               id="price"
               name="price"
               label="Τιμή"
+              value={price}
               fullWidth
               variant="standard"
+              onChange={handlePriceChange}
             />
           </Grid>
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <InputLabel id="area-label">Περιοχή</InputLabel>
+              <InputLabel id="city-label">Περιοχή</InputLabel>
               <Select
-                labelId="area-label"
-                id="area-select"
-                value={area}
+                labelId="city-label"
+                id="city-select"
+                value={city}
                 label="Περιοχή"
-                onChange={handleAreaChange}
+                onChange={handleCityChange}
               >
                 <MenuItem value={"Αθήνα"}>Αθήνα</MenuItem>
                 <MenuItem value={"Θεσσαλονίκη"}>Θεσσαλονίκη</MenuItem>
@@ -307,13 +350,13 @@ export default function App() {
           </Grid>
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <InputLabel id="listType-label">Διαθεσιμότητα</InputLabel>
+              <InputLabel id="availability-label">Διαθεσιμότητα</InputLabel>
               <Select
-                labelId="listType-label"
-                id="listType-select"
-                value={listType}
+                labelId="availability-label"
+                id="availability-select"
+                value={availability}
                 label="Διαθεσιμότητα"
-                onChange={handleListTypeChange}
+                onChange={handleAvailabilityChange}
               >
                 <MenuItem value={"Ενοίκιαση"}>Ενοίκιαση</MenuItem>
                 <MenuItem value={"Πώληση"}>Πώληση</MenuItem>
@@ -325,14 +368,16 @@ export default function App() {
               required
               id="sqm"
               name="sqm"
+              value={area}
               label="Τετραγωνικά"
               fullWidth
               variant="standard"
+              onChange={handleAreaChange}
             />
           </Grid>
 
           <Grid item xs={12}>
-            <Button onClick={handleForm} variant="contained">ΠΡΟΣΘΗΚΗ</Button>
+            <Button onClick={handleInsertForm} variant="contained">ΠΡΟΣΘΗΚΗ</Button>
           </Grid>
         </Grid>
       </Container>
@@ -354,7 +399,7 @@ export default function App() {
 
     return listings.map((listing, i) => {
       return (
-        <Grid container>
+        <Grid key={i} container>
           <Grid item xs={3}>
             <Chip
               icon={<LocationOnOutlined />}
