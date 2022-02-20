@@ -66,6 +66,14 @@ export default function App() {
   const [user, setUser] = React.useState<any>(null);
   const [listings, setListings] = React.useState<any>([]);
 
+  // Constants for new listing validation
+  const validCities = ['Αθήνα', 'Θεσσαλονίκη', 'Πάτρα', 'Ηράκλειο'];
+  const validAvailability = ['Ενοικίαση', 'Πώληση'];
+  const alertMessage = `Έγκυρες Περιοχές: ${validCities} \r\n` +
+      `Έγκυρες ακέραιες τιμές: 50 - 5000000\r\n` +
+      `Έγκυρη διαθεσιμότητα: ${validAvailability} \r\n` +
+      `Έγκυρο ακέραιο εμβδαδόν: 20 - 1000 \r\n`;
+
   const handleCityChange = (event: SelectChangeEvent) => {
     setCity(event.target.value as string);
   };
@@ -267,12 +275,6 @@ export default function App() {
               id="password"
               autoComplete="current-password"
             />
-            {/*
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
-            */}
             <Button
               type="submit"
               fullWidth
@@ -288,29 +290,51 @@ export default function App() {
     );
   }
 
+  function validateForm(): boolean {
+
+    let parsedPrice = Number(price);
+    let parsedArea = Number(area);
+
+    if(!validCities.includes(city) ||
+        !validAvailability.includes(availability) ||
+        (!Number.isInteger(parsedArea) || !Number.isInteger(parsedPrice)) ||
+        (parsedPrice < 50 || parsedPrice > 5000000) ||
+        (parsedArea < 20 || parsedArea > 1000)) {
+
+      alert(alertMessage);
+      return false;
+
+    }
+    return true;
+  }
+
   async function handleInsertForm(event) {
     event.preventDefault();
 
-    const requestOptions = {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({price: price, area: area, availability: availability, city: city})
-    };
+    // Only send to backend if form is valid
+    if(validateForm()) {
 
-    const response = await fetch(`/listings/${user.id}`, requestOptions);
-    if (response.ok) {
-      const data = await response.json();
-      //setListings(data);
-      let updatedListings = clone(listings);
-      updatedListings.push(data);
-      setListings(updatedListings);
+      const requestOptions = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({price: price, area: area, availability: availability, city: city})
+      };
 
-      // Clear form state
-      setPrice("");
-      setCity("");
-      setAvailability("");
-      setArea("");
+      const response = await fetch(`/listings/${user.id}`, requestOptions);
+      if (response.ok) {
+        const data = await response.json();
 
+        let updatedListings = clone(listings);
+        updatedListings.push(data);
+        setListings(updatedListings);
+
+        // Clear form state
+        setPrice("");
+        setCity("");
+        setAvailability("");
+        setArea("");
+
+      }
     }
   }
 
@@ -358,7 +382,7 @@ export default function App() {
                 label="Διαθεσιμότητα"
                 onChange={handleAvailabilityChange}
               >
-                <MenuItem value={"Ενοίκιαση"}>Ενοίκιαση</MenuItem>
+                <MenuItem value={"Ενοικίαση"}>Ενοικίαση</MenuItem>
                 <MenuItem value={"Πώληση"}>Πώληση</MenuItem>
               </Select>
             </FormControl>
@@ -369,7 +393,7 @@ export default function App() {
               id="sqm"
               name="sqm"
               value={area}
-              label="Τετραγωνικά"
+              label="Εμβδαδόν"
               fullWidth
               variant="standard"
               onChange={handleAreaChange}
