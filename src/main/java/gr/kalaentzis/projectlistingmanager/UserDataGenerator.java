@@ -18,7 +18,7 @@ public class UserDataGenerator implements CommandLineRunner {
     public void run(String... args) {
         User user = new User("spitogatos", "pass");
         user.addListing(new Listing( "Αθήνα", 140000, "Πώληση", 110, user));
-        user.addListing(new Listing( "Ηράκλειο", 650, "Ενοίκιο", 90, user));
+        user.addListing(new Listing( "Ηράκλειο", 650, "Ενοικίαση", 90, user));
         userRepository.save(user);
         userRepository.save(new User("kalaentzis","123"));
     }
