@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 
+/**
+ * This class represents a user's listing of the property listing management system
+ */
 @Entity
 @Table(name = "Listings")
 public class Listing {
@@ -32,6 +35,8 @@ public class Listing {
         this.area = area;
         this.user = user;
     }
+
+    // Basic Setters/Getters
 
     public Long getId() {
         return id;

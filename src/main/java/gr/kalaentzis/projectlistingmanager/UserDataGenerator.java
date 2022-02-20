@@ -6,6 +6,10 @@ import gr.kalaentzis.projectlistingmanager.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class is used for dummy data generation during the startup of the system
+ * Currently adds two users, one without any listings and the other with two listings.
+ */
 @Component
 public class UserDataGenerator implements CommandLineRunner {
     private final UserRepository userRepository;
