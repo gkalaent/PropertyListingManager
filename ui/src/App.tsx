@@ -417,6 +417,7 @@ export default function App() {
         let updatedListings = [...listings].filter(i => i.id !== listingId);
         user.listings = updatedListings;
         setListings(updatedListings);
+        alert("Listing deleted successfully!");
       }
 
     }
