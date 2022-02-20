@@ -73,21 +73,35 @@ export default function App() {
       `Έγκυρες ακέραιες τιμές: 50 - 5000000\r\n` +
       `Έγκυρη διαθεσιμότητα: ${validAvailability} \r\n` +
       `Έγκυρο ακέραιο εμβδαδόν: 20 - 1000 \r\n`;
+    
+  const priceRef = React.useRef(null);
+  const areaRef = React.useRef(null);
 
-  const handleCityChange = (event: SelectChangeEvent) => {
-    setCity(event.target.value as string);
+  const handleFormChange = (event) => {
+    let value = event.target.value as string;
+    switch (event.target.name) {
+      case "price":
+        setPrice(value);
+        setTimeout(() => {
+          priceRef.current.children[1].children[0].focus();
+        }, 10);
+        break;
+      case "city-select":
+        setCity(value);
+        break;
+      case "availability-select":
+        setAvailability(value);
+        break;
+      case "sqm":
+        setArea(value);
+        setTimeout(() => {
+          areaRef.current.children[1].children[0].focus();
+        }, 10);
+        break;
+      default:
+        return;
+    }
   };
-  const handleAvailabilityChange = (event: SelectChangeEvent) => {
-    setAvailability(event.target.value as string);
-  };
-
-  const handleAreaChange = (event) => {
-    setArea(event.target.value as string);
-  };
-  const handlePriceChange = (event) => {
-    setPrice(event.target.value as string);
-  };
-
 
 
   // Theme provider #fe9009 #04a7b7
@@ -346,13 +360,14 @@ export default function App() {
           <Grid item xs={12}>
             <TextField
               required
+              ref={priceRef}
               id="price"
               name="price"
               label="Τιμή"
               value={price}
               fullWidth
               variant="standard"
-              onChange={handlePriceChange}
+              onChange={handleFormChange}
             />
           </Grid>
           <Grid item xs={12}>
@@ -360,10 +375,11 @@ export default function App() {
               <InputLabel id="city-label">Περιοχή</InputLabel>
               <Select
                 labelId="city-label"
+                name="city-select"
                 id="city-select"
                 value={city}
                 label="Περιοχή"
-                onChange={handleCityChange}
+                onChange={handleFormChange}
               >
                 <MenuItem value={"Αθήνα"}>Αθήνα</MenuItem>
                 <MenuItem value={"Θεσσαλονίκη"}>Θεσσαλονίκη</MenuItem>
@@ -377,10 +393,11 @@ export default function App() {
               <InputLabel id="availability-label">Διαθεσιμότητα</InputLabel>
               <Select
                 labelId="availability-label"
+                name="availability-select"
                 id="availability-select"
                 value={availability}
                 label="Διαθεσιμότητα"
-                onChange={handleAvailabilityChange}
+                onChange={handleFormChange}
               >
                 <MenuItem value={"Ενοικίαση"}>Ενοικίαση</MenuItem>
                 <MenuItem value={"Πώληση"}>Πώληση</MenuItem>
@@ -391,12 +408,13 @@ export default function App() {
             <TextField
               required
               id="sqm"
+              ref={areaRef}
               name="sqm"
               value={area}
               label="Εμβδαδόν"
               fullWidth
               variant="standard"
-              onChange={handleAreaChange}
+              onChange={handleFormChange}
             />
           </Grid>
 
@@ -497,7 +515,7 @@ export default function App() {
             </Button>
           </Toolbar>
         </AppBar>
-        <Container component="main" maxWidth="xl" sx={{ m: 4, mt: 5 }}>
+        <Container maxWidth="xl" sx={{ m: 4, mt: 5 }}>
           <Grid container spacing={2}>
             <Grid item xs={4}>
               <Paper elevation={6}>
