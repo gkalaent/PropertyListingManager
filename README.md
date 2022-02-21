@@ -50,7 +50,7 @@ and extract it to `C:\ `
 * If `JDK 17` is not installed, download and install from here: [JDK 17]( https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.exe) 
 * If `maven` is not installed, download from here: [maven]( https://dlcdn.apache.org/maven/maven-3/3.8.4/binaries/apache-maven-3.8.4-bin.zip) and extract it to `C:\ `
 * Open a terminal and run the following commands:
-```aidl
+```
 $env:JAVA_HOME='C:\Program Files\Java\jdk-17.0.2'
 $env:Path += ';C:\Program Files\Java\jdk-17.0.2\bin'
 $env:Path += ';C:\apache-maven-3.8.4\bin'
