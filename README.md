@@ -104,4 +104,6 @@ cd PropertyListingManager
 mvn spring-boot:run
 ```
 
+### Testing
 
+To run the provided integration tests, setup the environment and then run `mvn test` instead of `mvn spring-boot:run` 
