@@ -38,7 +38,7 @@ At the login screen, a user must provide valid credentials to log in to the serv
 (see: [Initial Data](#initial-data))
 
 Once the user is authenticated, they are navigated to their dashboard, where they can view, delete and add new listings to the service.
-## Enrivonment Setup and Run
+## Environment Setup and Run
 This project requires `maven` and `JDK 17`. Installation paths can be changed, but commands need to be changed accordingly.
 Once the server is deployed, it will be available at ```http://localhost:8080```
 
@@ -106,4 +106,4 @@ mvn spring-boot:run
 
 ### Testing
 
-To run the provided integration tests, setup the environment and then run `mvn test` instead of `mvn spring-boot:run` 
+To run the provided integration tests, set up the environment and then run `mvn test` instead of `mvn spring-boot:run` 
