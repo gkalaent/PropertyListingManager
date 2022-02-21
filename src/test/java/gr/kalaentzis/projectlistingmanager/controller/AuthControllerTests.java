@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@SpringBootTest
+@SpringBootTest( webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class AuthControllerTests {
 
     private static String authUrl;
