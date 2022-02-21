@@ -564,7 +564,7 @@ export default function App() {
     );
   }
 
-  // function App returns
+  // rendering of the App and Routes
   return (
       <AuthProvider>
         <ThemeProvider theme={theme}>
