@@ -1,13 +1,13 @@
-const authorizor = {
+const authorizer = {
     isAuthenticated: false,
     signin(callback: VoidFunction) {
-        authorizor.isAuthenticated = true;
+        authorizer.isAuthenticated = true;
       setTimeout(callback, 100); // fake async
     },
     signout(callback: VoidFunction) {
-        authorizor.isAuthenticated = false;
+        authorizer.isAuthenticated = false;
       setTimeout(callback, 100);
     }
   };
   
-  export { authorizor };
+  export { authorizer };

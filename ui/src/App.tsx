@@ -3,17 +3,16 @@ import "./App.css";
 
 import { clone } from 'lodash';
 
+import { authorizer } from './auth.ts';
+
 // Routing Imports
 import {
   Routes,
   Route,
-  Link,
   useNavigate,
   useLocation,
   Navigate,
-  Outlet,
 } from "react-router-dom";
-import { authorizor } from "./auth.ts";
 
 // Material UI imports
 import {
@@ -21,8 +20,6 @@ import {
   Button,
   CssBaseline,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Grid,
   Box,
   Typography,
@@ -42,41 +39,49 @@ import {
 
 // Material icons
 import {
-  Menu,
-  LockOutlined,
   MapsHomeWorkOutlined,
   LocationOnOutlined,
-  DragIndicatorOutlined,
   EuroOutlined,
   SquareFootOutlined,
-  DeleteOutlineOutlined, Map, HouseOutlined,
+  DeleteOutlineOutlined, HouseOutlined,
 } from "@mui/icons-material/";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { SelectChangeEvent } from "@mui/material/Select";
 
-
+/**
+ * Main function of the frontend, contains functions that generate the
+ * Login and Dashboard page
+ */
 export default function App() {
+
+  // State of an add listing form
   const [city, setCity] = React.useState("");
   const [availability, setAvailability] = React.useState("");
   const [price, setPrice] = React.useState("");
   const [area, setArea] = React.useState("");
 
-
+  // User's state
   const [user, setUser] = React.useState<any>(null);
   const [listings, setListings] = React.useState<any>([]);
 
   // Constants for new listing validation
   const validCities = ['Αθήνα', 'Θεσσαλονίκη', 'Πάτρα', 'Ηράκλειο'];
   const validAvailability = ['Ενοικίαση', 'Πώληση'];
+
+  // The message that is returned when a form is not valid
   const alertMessage = `Έγκυρες Περιοχές: ${validCities} \r\n` +
       `Έγκυρες ακέραιες τιμές: 50 - 5000000\r\n` +
       `Έγκυρη διαθεσιμότητα: ${validAvailability} \r\n` +
       `Έγκυρο ακέραιο εμβδαδόν: 20 - 1000 \r\n`;
-    
+
+  // References used in new listing form
   const priceRef = React.useRef(null);
   const areaRef = React.useRef(null);
 
+  /**
+   * Event handler when there is a change in the
+   * new listing form
+   */
   const handleFormChange = (event) => {
     let value = event.target.value as string;
     switch (event.target.name) {
@@ -103,8 +108,7 @@ export default function App() {
     }
   };
 
-
-  // Theme provider #fe9009 #04a7b7
+  // Theme colors of the system
   const theme = createTheme({
     palette: {
       primary: {
@@ -124,7 +128,7 @@ export default function App() {
         styleOverrides: {
           colorSecondary: {
             color: "#252628",
-            backgroundColor: "#ffdba8",/*"#04a7b7",*/
+            backgroundColor: "#ffdba8",
           },
         },
       },
@@ -138,24 +142,27 @@ export default function App() {
     },
   });
 
+  // signature of an authorization context
   interface AuthContextType {
     user: any;
-    signin: (/*user: any,*/ callback: VoidFunction) => void;
+    signin: (callback: VoidFunction) => void;
     signout: (callback: VoidFunction) => void;
   }
 
   let AuthContext = React.createContext<AuthContextType>(null);
 
+  /**
+   * The authorization provider with basic sign in and sign out functions
+   */
   function AuthProvider({ children }: { children: React.ReactNode }) {
-    let signin = (/*newUser, */callback: VoidFunction) => {
-      return authorizor.signin(() => {
-        //setUser(newUser);
+    let signin = (callback: VoidFunction) => {
+      return authorizer.signin(() => {
         callback();
       });
     };
 
     let signout = (callback: VoidFunction) => {
-      return authorizor.signout(() => {
+      return authorizer.signout(() => {
         // Reset state
         setUser(null);
         setListings([]);
@@ -174,43 +181,31 @@ export default function App() {
     );
   }
 
+  /**
+   * Use the authorization context
+   */
   function useAuth() {
     return React.useContext(AuthContext);
   }
 
-  return (
-    <AuthProvider>
-      <ThemeProvider theme={theme}>
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <RequireAuth>
-                <Dashboard />
-              </RequireAuth>
-            }
-          />
-        </Routes>
-      </ThemeProvider>
-    </AuthProvider>
-  );
-
+  /**
+   * Authorization context used to validate that user can access the page
+   * On invalid authorization, the user is redirected to the login page
+   */
   function RequireAuth({ children }: { children: JSX.Element }) {
     let auth = useAuth();
     let location = useLocation();
 
     if (!auth.user) {
-      // Redirect them to the /login page, but save the current location they were
-      // trying to go to when they were redirected. This allows us to send them
-      // along to that page after they login, which is a nicer user experience
-      // than dropping them off on the home page.
       return <Navigate to="/" state={{ from: location }} replace />;
     }
 
     return children;
   }
 
+  /**
+   * Generates the UI of the Login page
+   */
   function LoginPage() {
     let navigate = useNavigate();
     let location = useLocation();
@@ -219,28 +214,31 @@ export default function App() {
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
       event.preventDefault();
 
+      // Receive the form data from the sign in
       let formData = new FormData(event.currentTarget);
-      //let username = formData.get("username") as string;
 
-      auth.signin(/*username,*/ async () => {
-        // Send them back to the page they tried to visit when they were
-        // redirected to the login page. Use { replace: true } so we don't create
-        // another entry in the history stack for the login page.  This means that
-        // when they get to the protected page and click the back button, they
-        // won't end up back on the login page, which is also really nice for the
-        // user experience.
+      auth.signin( async () => {
+
+        // Generate the sign in Request
+        // We send to the backend the username and password that were received from the form
         const requestOptions = {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({username: formData.get("username"), password: formData.get("password")})
         };
+
+        // Receive the response from the backend
         const response = await fetch('/auth', requestOptions);
+
+        // If the user was authorized, send them to their dashboard
         if (response.ok) {
           const data = await response.json();
+          // Update the state
           setUser(data);
           setListings(data.listings);
           navigate("/dashboard", {replace: true});
         } else {
+          // Invalid user authorization
           alert("Username or password is incorrect");
         }
       });
@@ -304,6 +302,13 @@ export default function App() {
     );
   }
 
+  /**
+   * Utility function that check's if the listing in the form is valid.
+   * Valid cities: "Αθήνα", "Θεσσαλονίκη", "Πάτρα", "Ηράκλειο"
+   * Valid price: 50 - 5.000.000
+   * Valid availability: "Πώληση", "Ενοικίαση"
+   * Valid area: 20 - 1.000
+   */
   function validateForm(): boolean {
 
     let parsedPrice = Number(price);
@@ -322,6 +327,9 @@ export default function App() {
     return true;
   }
 
+  /**
+   * Event handler for the new listing form submit
+   */
   async function handleInsertForm(event) {
     event.preventDefault();
 
@@ -338,11 +346,12 @@ export default function App() {
       if (response.ok) {
         const data = await response.json();
 
+        // Update the user's listings with the newly added listing
         let updatedListings = clone(listings);
         updatedListings.push(data);
         setListings(updatedListings);
 
-        // Clear form state
+        // Clear state of the form
         setPrice("");
         setCity("");
         setAvailability("");
@@ -352,6 +361,10 @@ export default function App() {
     }
   }
 
+  /**
+   * Utility function that returns the
+   * user's new listing form
+   */
   function getForm() {
 
     return (
@@ -426,20 +439,27 @@ export default function App() {
     );
   }
 
-  function getListings() {
+  /**
+   * Delete listing event handler
+   * @param listingId The id of the listing to be deleted
+   */
+  async function handleDelete(listingId) {
 
-    async function handleDelete(listingId) {
+    const response = await fetch(`/listings/${user.id}/${listingId}`, {method: 'DELETE'});
 
-      const response = await fetch(`/listings/${user.id}/${listingId}`, {method: 'DELETE'});
-      if (response.ok) {
-        let updatedListings = [...listings].filter(i => i.id !== listingId);
-        user.listings = updatedListings;
-        setListings(updatedListings);
-        alert("Listing deleted successfully!");
-      }
-
+    // If we received an OK response, update the user's listings and alert the user
+    if (response.ok) {
+      let updatedListings = [...listings].filter(i => i.id !== listingId);
+      user.listings = updatedListings;
+      setListings(updatedListings);
+      alert("Listing deleted successfully!");
     }
+  }
 
+  /**
+   * Utility function that returns the user's listings
+   */
+  function getListings() {
     return listings.map((listing, i) => {
       return (
         <Grid key={i} container>
@@ -481,11 +501,12 @@ export default function App() {
     });
   }
 
+  /**
+   * Generates the UI of the Dashboard page
+   */
   function Dashboard() {
     let auth = useAuth();
     let navigate = useNavigate();
-
-
 
     return (
       <Box sx={{ flexGrow: 1 }}>
@@ -542,4 +563,21 @@ export default function App() {
       </Box>
     );
   }
+
+  // function App returns
+  return (
+      <AuthProvider>
+        <ThemeProvider theme={theme}>
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/dashboard"  element={
+              <RequireAuth>
+                <Dashboard />
+              </RequireAuth>
+            }
+            />
+          </Routes>
+        </ThemeProvider>
+      </AuthProvider>
+  );
 }
